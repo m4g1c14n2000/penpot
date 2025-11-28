@@ -206,7 +206,7 @@
   [^bytes blob-data & {:as opts}]
   (let [decoded-data (decode-raw-blob blob-data)]
     (json/encode (deep-convert decoded-data)
-                 :indent (when (:pretty? opts true) 2))))
+                 :indent (when (get opts :pretty? true) 2))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DIRECT DATABASE ACCESS (for advanced use cases)

@@ -77,7 +77,7 @@
      ["/get-file-json"
       {:handler get-file-json
        :transaction true
-       :allowed-methods #{:post :get}}]]))
+       :allowed-methods #{:post}}]]))
 
 ;; ---- HELPERS
 
