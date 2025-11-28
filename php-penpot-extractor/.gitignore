@@ -1,0 +1,16 @@
+# Configuration (contains credentials)
+config.php
+
+# PHP dependencies (if using composer)
+vendor/
+composer.lock
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
