@@ -17,14 +17,13 @@
    - :user     - Username (default: penpot)
    - :password - Password (required)"
   [{:keys [host port dbname user password]}]
-  (let [jdbc-url (format "jdbc:postgresql://%s:%d/%s"
-                         (or host "localhost")
-                         (or port 5432)
-                         (or dbname "penpot"))]
-    (jdbc/get-datasource
-     {:jdbcUrl jdbc-url
-      :username (or user "penpot")
-      :password password})))
+  (jdbc/get-datasource
+   {:dbtype "postgresql"
+    :dbname (or dbname "penpot")
+    :host (or host "localhost")
+    :port (or port 5432)
+    :user (or user "penpot")
+    :password password}))
 
 (defn get-file
   "Get file record by ID."
