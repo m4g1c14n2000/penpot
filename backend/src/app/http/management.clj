@@ -17,6 +17,7 @@
    [app.main :as-alias main]
    [app.rpc.commands.profile :as cmd.profile]
    [app.setup :as-alias setup]
+   [app.srepl.export-file-data :as efd]
    [app.tokens :as tokens]
    [app.worker :as-alias wrk]
    [integrant.core :as ig]
@@ -27,6 +28,7 @@
 (declare ^:private authenticate)
 (declare ^:private get-customer)
 (declare ^:private update-customer)
+(declare ^:private get-file-json)
 
 (defmethod ig/assert-key ::routes
   [_ params]
@@ -70,7 +72,12 @@
      ["/update-customer"
       {:handler update-customer
        :allowed-methods #{:post}
-       :transaction true}]]))
+       :transaction true}]
+
+     ["/get-file-json"
+      {:handler get-file-json
+       :transaction true
+       :allowed-methods #{:post}}]]))
 
 ;; ---- HELPERS
 
@@ -238,3 +245,51 @@
 
     {::yres/status 201
      ::yres/body nil}))
+
+
+;; ---- API: GET-FILE-JSON
+
+(def ^:private schema:get-file-json
+  [:map
+   [:file-id ::sm/uuid]
+   [:include-file-info {:optional true} :boolean]
+   [:format {:optional true} [:enum "json" "transit"]]])
+
+(def ^:private coerce-get-file-json-params
+  (coercer schema:get-file-json
+           :type :validation
+           :hint "invalid data provided for `get-file-json` rpc call"))
+
+(defn- get-file-json
+  "Handler for extracting file data as JSON or Transit format.
+
+  This endpoint extracts the file data stored in the database
+  (which is stored as compressed and serialized ByteA) and
+  converts it to a readable JSON format.
+
+  Request Parameters:
+  - file-id: UUID of the file to extract
+  - include-file-info: boolean, if true includes file metadata (default: true)
+  - format: 'json' or 'transit' (default: 'json')
+
+  Returns:
+  - JSON object with file data or an error response"
+  [cfg request]
+  (let [params (-> request :params coerce-get-file-json-params)
+        file-id (:file-id params)
+        include-file-info? (get params :include-file-info true)
+        format-type (get params :format "json")]
+
+    (l/dbg :hint "get-file-json"
+           :file-id (str file-id)
+           :format format-type)
+
+    (let [file-data (efd/get-file-data cfg file-id)
+          result (case format-type
+                   "transit" (efd/file-data->transit-json file-data {:verbose? true})
+                   "json" (efd/file-data->json file-data {:include-file-info? include-file-info?}))]
+      {::yres/status 200
+       ::yres/headers {"content-type" (if (= format-type "transit")
+                                        "application/transit+json"
+                                        "application/json")}
+       ::yres/body result})))
