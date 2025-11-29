@@ -4,7 +4,7 @@
   org.clojure/data.fressian {:mvn/version "1.1.0"}
   com.cognitect/transit-clj {:mvn/version "1.0.333"}
   frankiesardo/linked {:mvn/version "1.3.0"}
-  funcool/cuerdas {:mvn/version "2024.07.29-413"}
+  funcool/cuerdas {:mvn/version "2025.06.16-414"}
   lambdaisland/uri {:mvn/version "1.19.155"
                     :exclusions [org.clojure/data.json]}
   
